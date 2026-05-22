@@ -79,8 +79,11 @@ export async function POST(req: NextRequest) {
                 notes,
             },
             {
-              type: "input_image",
-              image_url: imageDataUrl,
+             {
+  type: "input_image",
+  image_url: imageDataUrl,
+  detail: "auto",
+},
             },
           ],
         },
