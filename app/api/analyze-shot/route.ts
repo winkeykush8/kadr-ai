@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   try {
     if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json(
-        { error: "OPENAI_API_KEY غير موجود. أضفه داخل .env.local" },
+        { error: "OPENAI_API_KEY غير موجود. أضفه داخل Vercel Environment Variables" },
         { status: 500 }
       );
     }
@@ -65,37 +65,27 @@ export async function POST(req: NextRequest) {
 - التحليل العربي، والـ prompt إنجليزي.
 `;
 
-const response = await client.responses.create({
-  model,
-  instructions,
-  input: [
-    {
-      role: "user",
-      content: [
+    const response = await client.responses.create({
+      model,
+      instructions,
+      input: [
         {
-          type: "input_text",
-          text:
-            "حلل هذه اللقطة لصناعة أفلام AI. ملاحظات المستخدم: " +
-            notes,
-        },
-        {
-          type: "input_image" as const,
-          image_url: imageDataUrl,
-          detail: "auto" as const,
-        },
-      ],
-    },
-  ],
-});
-  type: "input_image" as const,
-  image_url: imageDataUrl,
-  detail: "auto" as const,
-},
-},
+          role: "user",
+          content: [
+            {
+              type: "input_text",
+              text:
+                "حلل هذه اللقطة لصناعة أفلام AI. ملاحظات المستخدم: " +
+                notes,
+            },
+            {
+              type: "input_image",
+              image_url: imageDataUrl,
+              detail: "auto",
             },
           ],
         },
-      ],
+      ] as any,
     });
 
     const text = response.output_text || "";
