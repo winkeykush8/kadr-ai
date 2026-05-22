@@ -65,22 +65,28 @@ export async function POST(req: NextRequest) {
 - التحليل العربي، والـ prompt إنجليزي.
 `;
 
-    const response = await client.responses.create({
-      model,
-      instructions,
-      input: [
+const response = await client.responses.create({
+  model,
+  instructions,
+  input: [
+    {
+      role: "user",
+      content: [
         {
-          role: "user",
-          content: [
-            {
-              type: "input_text",
-              text:
-                "حلل هذه اللقطة لصناعة أفلام AI. ملاحظات المستخدم: " +
-                notes,
-            },
-            {
-             {
- {
+          type: "input_text",
+          text:
+            "حلل هذه اللقطة لصناعة أفلام AI. ملاحظات المستخدم: " +
+            notes,
+        },
+        {
+          type: "input_image" as const,
+          image_url: imageDataUrl,
+          detail: "auto" as const,
+        },
+      ],
+    },
+  ],
+});
   type: "input_image" as const,
   image_url: imageDataUrl,
   detail: "auto" as const,
