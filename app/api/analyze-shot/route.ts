@@ -72,27 +72,27 @@ export async function POST(req: NextRequest) {
 ${notes}
 `;
 
-  const response = await client.chat.completions.create({
-  model,
-  messages: [
-    {
-      role: "user",
-      content: [
+    const response = await client.chat.completions.create({
+      model,
+      messages: [
         {
-          type: "text",
-          text: prompt,
-        },
-        {
-          type: "image_url",
-          image_url: {
-            url: imageDataUrl,
-          },
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: prompt,
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: imageDataUrl,
+              },
+            },
+          ],
         },
       ],
-    },
-  ],
-  temperature: 0.4,
-});
+      temperature: 0.4,
+    });
 
     const text = response.choices[0]?.message?.content || "";
     const analysis = extractJson(text);
