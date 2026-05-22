@@ -80,9 +80,11 @@ export async function POST(req: NextRequest) {
             },
             {
              {
-  type: "input_image",
+ {
+  type: "input_image" as const,
   image_url: imageDataUrl,
-  detail: "auto",
+  detail: "auto" as const,
+},
 },
             },
           ],
