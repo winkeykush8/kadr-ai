@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "15.1.6",
+  "next": "latest",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "openai": "^4.85.4",
