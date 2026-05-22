@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   try {
     if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json(
-        { error: "OPENAI_API_KEY غير موجود. أضفه داخل Vercel Environment Variables" },
+        { error: "OPENAI_API_KEY غير موجود داخل Vercel Environment Variables" },
         { status: 500 }
       );
     }
@@ -30,19 +30,30 @@ export async function POST(req: NextRequest) {
 
     if (!imageDataUrl || !imageDataUrl.startsWith("data:image/")) {
       return NextResponse.json(
-        { error: "ارفع صورة صالحة بصيغة image data URL" },
+        { error: "ارفع صورة صالحة" },
         { status: 400 }
       );
     }
 
     const model = process.env.OPENAI_MODEL || "gpt-4.1-mini";
 
-    const instructions = `
+    const prompt = `
 أنت KADR AI، مساعد مدير تصوير لصناعة الأفلام بالذكاء الاصطناعي.
-حلل الصورة بدقة من ناحية سينمائية، وليس وصف عادي للصورة.
 
-أرجع JSON فقط بدون markdown.
-يجب أن يكون الشكل:
+حلل الصورة من ناحية:
+- نوع اللقطة
+- الكادر والتكوين
+- الإضاءة
+- زاوية الكاميرا
+- العدسة المتوقعة
+- Film Look
+- المزاج
+- إلهام إخراجي عام
+- نقاط الضعف
+- التحسينات
+- Prompt إنجليزي جاهز
+
+أرجع JSON فقط بهذا الشكل:
 {
   "shotType": "...",
   "composition": "...",
@@ -54,46 +65,37 @@ export async function POST(req: NextRequest) {
   "directorInspiration": "...",
   "weaknesses": ["...", "..."],
   "improvements": ["...", "..."],
-  "prompt": "English cinematic prompt for AI image/video generation"
+  "prompt": "..."
 }
 
-قواعد مهمة:
-- العدسة مجرد تقدير، اذكر ذلك داخل lensGuess.
-- Film Look مجرد تقدير بصري، وليس معلومة مؤكدة.
-- لا تنسخ أسلوب مخرج حرفياً؛ استخدمه كإلهام بصري عام.
-- prompt يجب أن يكون بالإنجليزية ومناسب لـ Veo / Runway / Midjourney / Wan.
-- التحليل العربي، والـ prompt إنجليزي.
+ملاحظات المستخدم:
+${notes}
 `;
 
-    const response = await client.responses.create({
+    const response = await client.chat.completions.create({
       model,
-      instructions,
-      input: [
+      messages: [
         {
           role: "user",
           content: [
+            { type: "text", text: prompt },
             {
-              type: "input_text",
-              text:
-                "حلل هذه اللقطة لصناعة أفلام AI. ملاحظات المستخدم: " +
-                notes,
-            },
-            {
-              type: "input_image",
-              image_url: imageDataUrl,
-              detail: "auto",
+              type: "image_url",
+              image_url: {
+                url: imageDataUrl,
+              },
             },
           ],
         },
-      ] as any,
+      ],
+      temperature: 0.4,
     });
 
-    const text = response.output_text || "";
+    const text = response.choices[0]?.message?.content || "";
     const analysis = extractJson(text);
 
     return NextResponse.json({ analysis });
   } catch (error: any) {
-    console.error(error);
     return NextResponse.json(
       { error: error?.message || "حدث خطأ في تحليل الصورة" },
       { status: 500 }
